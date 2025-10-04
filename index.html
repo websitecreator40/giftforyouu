@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>I have a little secret for you...</title>
+  <style>
+    :root{--bg1:#0b0710;--bg2:#4b0638;--accent1:#ff6bb5;--accent2:#9b5cff}
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
+    body{background:linear-gradient(135deg,var(--bg1),var(--bg2));color:#fff;display:flex;align-items:center;justify-content:center}
+    .card{width:min(720px,96vw);padding:36px 28px;border-radius:18px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.5);background:transparent}
+    h1{font-size:34px;margin:6px 0 6px;font-weight:700;text-shadow:0 6px 18px rgba(0,0,0,0.6)}
+    p.lead{opacity:0.9;margin:8px 0 28px;font-size:18px}.cartoon-wrap{display:flex;align-items:center;justify-content:center;margin:8px 0 18px}
+.cartoon{width:180px;height:180px;position:relative;filter:drop-shadow(0 8px 18px rgba(0,0,0,0.6));cursor:pointer}
+
+.bobbing{animation:bob 2.2s ease-in-out infinite}
+@keyframes bob{0%{transform:translateY(0)}50%{transform:translateY(-10px)}100%{transform:translateY(0)}}
+
+.bubble{position:relative;display:inline-block;margin-top:8px;padding:10px 14px;border-radius:18px;background:rgba(255,255,255,0.06);backdrop-filter:blur(4px);font-weight:600}
+
+.open-btn{display:inline-block;margin-top:22px;padding:14px 30px;border-radius:40px;font-weight:700;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#fff;border:none;cursor:pointer;font-size:18px;box-shadow:0 8px 18px rgba(155,92,255,0.25)}
+.open-btn:active{transform:translateY(2px)}
+
+.helper{margin-top:12px;color:rgba(255,255,255,0.7);font-size:14px}
+
+@media (max-width:420px){.cartoon{width:140px;height:140px}h1{font-size:22px}}
+
+.mouth{transition:transform 0.08s linear}
+.talk .mouth{transform:scaleY(1.2)}
+
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="cartoon-wrap">
+      <svg class="cartoon bobbing" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="cute cartoon">
+        <defs>
+          <linearGradient id="g" x1="0" x2="1">
+            <stop offset="0%" stop-color="#ffd0b3" />
+            <stop offset="100%" stop-color="#f9b9a7" />
+          </linearGradient>
+        </defs>
+        <ellipse cx="100" cy="78" rx="72" ry="64" fill="#fff" stroke="#f0e9f8" stroke-width="3"/>
+        <circle cx="100" cy="94" r="46" fill="url(#g)" />
+        <ellipse cx="78" cy="100" rx="8" ry="5" fill="#ffcfb8" opacity="0.9"/>
+        <ellipse cx="122" cy="100" rx="8" ry="5" fill="#ffcfb8" opacity="0.9"/>
+        <circle cx="86" cy="92" r="4.8" fill="#3a2b2b" />
+        <circle cx="114" cy="92" r="4.8" fill="#3a2b2b" />
+        <g id="mouthGroup" transform="translate(0,6)">
+          <ellipse class="mouth" cx="100" cy="114" rx="10" ry="4" fill="#3a2b2b" />
+        </g>
+      </svg>
+    </div>
+    <h1><i>PRAPTI</i></h1>
+    <h1>I have a little secret for you...</h1>
+    <p class="lead">And trust me... only <strong>YOU</strong> deserve this ✨</p>
+
+    <div class="bubble" id="speech">Click the pink button below — I'll tell you a secret 🎁</div>
+
+    <div>
+      <button id="openBtn" class="open-btn" onclick="openSecondPage()">Open it 🎁</button>
+    </div>
+
+    <div class="helper">Hey Prapti, click the above button, I want to tell you something.</div>
+  </div>
+
+  <script>
+    function openSecondPage(){
+      window.location.href = "s.html"; 
+    }
+  </script>
+</body>
+</html>
