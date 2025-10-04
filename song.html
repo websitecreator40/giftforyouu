@@ -5,16 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>3D Lyrics Player</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
       background: radial-gradient(circle at center, #000015, #000);
-      overflow: hidden;
       height: 100vh;
+      overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -43,12 +38,12 @@
     #lyrics {
       position: absolute;
       text-align: center;
-      bottom: 20%;
+      bottom: 18%;
       font-size: 28px;
       font-weight: bold;
       opacity: 0;
       transition: opacity 0.5s ease;
-      text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+      text-shadow: 0 0 15px rgba(255,255,255,0.8);
     }
 
     canvas {
@@ -64,6 +59,7 @@
   <button id="playBtn">▶ Play Song</button>
   <div id="lyrics"></div>
 
+  <!-- Make sure your mp3 file is in the same folder -->
   <audio id="song" src="song.mp3"></audio>
 
   <script>
@@ -71,69 +67,68 @@
     const song = document.getElementById("song");
     const lyricsDiv = document.getElementById("lyrics");
 
-    // 🎵 Apne song ke lyrics yahan likho:
+    // ✅ Use only plain text here (no commas or quotes inside)
     const lyrics = [
-      "Are you really ready?",
-      "The night is calling your name...",
-      "Step into the rhythm, feel the flame!",
-      "Hearts racing, lights are wild,",
-      "We’re losing control, just stay a while!",
-      "This is the moment, this is the sound,",
-      "Let the music spin you around!"
+      "Pehela hooran barre likhde c gallan jo",
+      "Hun gaane tere mere utte likhan lagge ne",
+      "Tu haseen tera naam haseen ay",
+      "Tere ishq da jaam haseen ay",
+      "Ye bhi matlabi zindegi",
+      "Zadon bhi tere nam haseen ay"
     ];
 
+    let index = 0;
+
     playBtn.addEventListener("click", () => {
-      playBtn.style.display = "none";
-      song.play();
-      startLyrics();
+      song.play()
+        .then(() => {
+          playBtn.style.display = "none";
+          startLyrics();
+        })
+        .catch(() => {
+          alert("Tap the Play button again to allow audio!");
+        });
     });
 
-    // 🎶 Lyrics timing control
     function startLyrics() {
-      let index = 0;
+      index = 0;
       lyricsDiv.textContent = lyrics[index];
       lyricsDiv.style.opacity = 1;
 
-      // Lyrics start instantly, change every 2.5s
-      setTimeout(() => {
-        const interval = setInterval(() => {
-          index++;
-          if (index < lyrics.length) {
-            lyricsDiv.style.opacity = 0;
-            setTimeout(() => {
-              lyricsDiv.textContent = lyrics[index];
-              lyricsDiv.style.opacity = 1;
-            }, 200); // fast fade
-          } else {
-            clearInterval(interval);
-            // Show button again when lyrics finish
-            setTimeout(() => {
-              playBtn.style.display = "block";
-              playBtn.textContent = "▶ Replay";
-            }, 3000);
-          }
-        }, 2500); // 2.5 seconds per line
-      }, 0);
+      const interval = setInterval(() => {
+        index++;
+        if (index < lyrics.length) {
+          lyricsDiv.style.opacity = 0;
+          setTimeout(() => {
+            lyricsDiv.textContent = lyrics[index];
+            lyricsDiv.style.opacity = 1;
+          }, 200);
+        } else {
+          clearInterval(interval);
+          lyricsDiv.style.opacity = 0;
+          playBtn.style.display = "block";
+          playBtn.textContent = "▶ Replay";
+        }
+      }, 2500);
     }
 
-    // 🌌 Background animation
+    // 🌌 Background animation (simple & safe for GitHub)
     const canvas = document.getElementById("bg");
     const ctx = canvas.getContext("2d");
     canvas.width = innerWidth;
     canvas.height = innerHeight;
 
-    const stars = Array.from({ length: 100 }, () => ({
+    const stars = Array.from({ length: 80 }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
       z: Math.random() * 2 + 0.5,
-      r: Math.random() * 1.5,
+      r: Math.random() * 1.5
     }));
 
     function animate() {
-      ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+      ctx.fillStyle = "rgba(0,0,0,0.3)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = "#fff";
-
       for (let s of stars) {
         ctx.beginPath();
         ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
@@ -145,7 +140,6 @@
     }
     animate();
 
-    // Resize fix
     window.addEventListener("resize", () => {
       canvas.width = innerWidth;
       canvas.height = innerHeight;
