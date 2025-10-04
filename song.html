@@ -5,52 +5,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>3D Lyrics Player</title>
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
+    * {margin:0; padding:0; box-sizing:border-box;}
     body {
       background: radial-gradient(circle at center, #000015, #000);
-      height: 100vh;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      color: white;
-      font-family: "Poppins", sans-serif;
+      height:100vh;
+      overflow:hidden;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      flex-direction:column;
+      color:white;
+      font-family:"Poppins",sans-serif;
     }
-
     #playBtn {
-      background: linear-gradient(45deg, #ff2e63, #08d9d6);
-      border: none;
-      color: white;
-      padding: 15px 40px;
-      font-size: 20px;
-      border-radius: 30px;
-      cursor: pointer;
-      transition: 0.3s;
-      z-index: 10;
+      background:linear-gradient(45deg,#ff2e63,#08d9d6);
+      border:none;
+      color:white;
+      padding:15px 40px;
+      font-size:20px;
+      border-radius:30px;
+      cursor:pointer;
+      transition:0.3s;
+      z-index:10;
     }
-
     #playBtn:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 20px #ff2e63;
+      transform:scale(1.1);
+      box-shadow:0 0 20px #ff2e63;
     }
-
     #lyrics {
-      position: absolute;
-      text-align: center;
-      bottom: 18%;
-      font-size: 28px;
-      font-weight: bold;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-      text-shadow: 0 0 15px rgba(255,255,255,0.8);
+      position:absolute;
+      text-align:center;
+      bottom:20%;
+      font-size:28px;
+      font-weight:bold;
+      opacity:0;
+      transition:opacity 0.5s ease;
+      text-shadow:0 0 15px rgba(255,255,255,0.8);
     }
-
     canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 0;
+      position:absolute;
+      top:0;
+      left:0;
+      z-index:0;
     }
   </style>
 </head>
@@ -59,87 +55,93 @@
   <button id="playBtn">▶ Play Song</button>
   <div id="lyrics"></div>
 
-  <!-- Make sure your mp3 file is in the same folder -->
-  <audio id="song" src="song.mp3"></audio>
+  <!-- Your mp3 file should be in same folder -->
+  <audio id="song" preload="auto" controls style="display:none;"></audio>
 
   <script>
     const playBtn = document.getElementById("playBtn");
     const song = document.getElementById("song");
     const lyricsDiv = document.getElementById("lyrics");
 
-    // ✅ Use only plain text here (no commas or quotes inside)
+    // ✅ Your song file name (same folder)
+    const SONG_URL = "song.mp3"; 
+
+    // ✅ Lyrics lines
     const lyrics = [
-      "Pehela hooran barre likhde c gallan jo
-      Hun gaane tere mere utte likhan lagge ne",
-      
+      "Pehela hooran barre likhde c gallan jo",
+      "Hun gaane tere mere utte likhan lagge ne",
       "Tu haseen tera naam haseen ay",
       "Tere ishq da jaam haseen ay",
       "Ye bhi matlabi zindegi",
       "Zadon bhi tere nam haseen ay"
     ];
 
-    let index = 0;
+    // Load audio file safely for GitHub Pages
+    song.src = SONG_URL;
+    song.load();
 
-    playBtn.addEventListener("click", () => {
-      song.play()
-        .then(() => {
-          playBtn.style.display = "none";
-          startLyrics();
-        })
-        .catch(() => {
-          alert("Tap the Play button again to allow audio!");
-        });
+    playBtn.addEventListener("click", async () => {
+      try {
+        await song.play();
+        playBtn.style.display = "none";
+        startLyrics();
+      } catch (err) {
+        alert("Please tap once more to allow playback!");
+        console.error(err);
+      }
     });
 
     function startLyrics() {
-      index = 0;
-      lyricsDiv.textContent = lyrics[index];
+      let i = 0;
+      lyricsDiv.textContent = lyrics[i];
       lyricsDiv.style.opacity = 1;
 
       const interval = setInterval(() => {
-        index++;
-        if (index < lyrics.length) {
+        i++;
+        if (i < lyrics.length) {
           lyricsDiv.style.opacity = 0;
           setTimeout(() => {
-            lyricsDiv.textContent = lyrics[index];
+            lyricsDiv.textContent = lyrics[i];
             lyricsDiv.style.opacity = 1;
           }, 200);
         } else {
           clearInterval(interval);
           lyricsDiv.style.opacity = 0;
-          playBtn.style.display = "block";
-          playBtn.textContent = "▶ Replay";
+          setTimeout(() => {
+            playBtn.textContent = "▶ Replay";
+            playBtn.style.display = "block";
+          }, 2000);
         }
       }, 2500);
     }
 
-    // 🌌 Background animation (simple & safe for GitHub)
+    // 🌌 Background animation (canvas stars)
     const canvas = document.getElementById("bg");
     const ctx = canvas.getContext("2d");
     canvas.width = innerWidth;
     canvas.height = innerHeight;
 
-    const stars = Array.from({ length: 80 }, () => ({
+    const stars = Array.from({ length: 100 }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      z: Math.random() * 2 + 0.5,
-      r: Math.random() * 1.5
+      r: Math.random() * 1.5 + 0.2,
+      speed: Math.random() * 0.6 + 0.2
     }));
 
-    function animate() {
+    function animateStars() {
       ctx.fillStyle = "rgba(0,0,0,0.3)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#fff";
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.fillStyle = "white";
       for (let s of stars) {
         ctx.beginPath();
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
         ctx.fill();
-        s.y += s.z;
+        s.y += s.speed;
         if (s.y > canvas.height) s.y = 0;
       }
-      requestAnimationFrame(animate);
+      requestAnimationFrame(animateStars);
     }
-    animate();
+    animateStars();
 
     window.addEventListener("resize", () => {
       canvas.width = innerWidth;
@@ -148,4 +150,3 @@
   </script>
 </body>
 </html>
-
