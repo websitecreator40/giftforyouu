@@ -1,151 +1,175 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>3D Lyrics Player</title>
   <style>
-    * {margin:0; padding:0; box-sizing:border-box;}
-    body {
-      background: radial-gradient(circle at center, #000015, #000);
-      height:100vh;
-      overflow:hidden;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      flex-direction:column;
-      color:white;
-      font-family:"Poppins",sans-serif;
+    html, body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: 'Poppins', sans-serif;
+      color: white;
     }
-    #playBtn {
-      background:linear-gradient(45deg,#ff2e63,#08d9d6);
-      border:none;
-      color:white;
-      padding:15px 40px;
-      font-size:20px;
-      border-radius:30px;
-      cursor:pointer;
-      transition:0.3s;
-      z-index:10;
+
+    #container {
+      width: 100vw;
+      height: 100vh;
     }
-    #playBtn:hover {
-      transform:scale(1.1);
-      box-shadow:0 0 20px #ff2e63;
-    }
+
     #lyrics {
-      position:absolute;
-      text-align:center;
-      bottom:20%;
-      font-size:28px;
-      font-weight:bold;
-      opacity:0;
-      transition:opacity 0.5s ease;
-      text-shadow:0 0 15px rgba(255,255,255,0.8);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      font-size: 2em;
+      font-weight: 600;
+      color: white;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+      transition: opacity 1s ease;
+      opacity: 0;
+      z-index: 5;
     }
-    canvas {
-      position:absolute;
-      top:0;
-      left:0;
-      z-index:0;
+
+    #playBtn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 20px 40px;
+      border: none;
+      border-radius: 12px;
+      font-size: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      background: linear-gradient(90deg, #ff6bb4, #6b8bff);
+      color: white;
+      transition: transform 0.2s ease, background 0.3s ease;
+      z-index: 10;
+    }
+
+    #playBtn:hover {
+      transform: translate(-50%, -50%) scale(1.05);
+    }
+
+    #playBtn.playing {
+      background: linear-gradient(90deg, #3ddc84, #00c2ff);
+      transform: translate(-50%, -50%) scale(0.9);
     }
   </style>
 </head>
 <body>
-  <canvas id="bg"></canvas>
-  <button id="playBtn">▶ Play Song</button>
+  <div id="container"></div>
   <div id="lyrics"></div>
+  <button id="playBtn">Play</button>
+  <audio id="audio" src="song.mp3" preload="auto"></audio>
 
-  <!-- Your mp3 file should be in same folder -->
-  <audio id="song" preload="auto" controls style="display:none;"></audio>
-
+  <script src="https://unpkg.com/three@0.150.1/build/three.min.js"></script>
   <script>
-    const playBtn = document.getElementById("playBtn");
-    const song = document.getElementById("song");
-    const lyricsDiv = document.getElementById("lyrics");
-
-    // ✅ Your song file name (same folder)
-    const SONG_URL = "song.mp3"; 
-
-    // ✅ Lyrics lines
+    // 🔹 Lyrics List
     const lyrics = [
-      "Pehela hooran barre likhde c gallan jo",
-      "Hun gaane tere mere utte likhan lagge ne",
+      "pehela hooran barre likhde c gallan jo",
+      "hun gaane tere mere utte likhan lagge ne",
       "Tu haseen tera naam haseen ay",
-      "Tere ishq da jaam haseen ay",
-      "Ye bhi matlabi zindegi",
-      "Zadon bhi tere nam haseen ay"
+      "tere ishq da jaam haseen ay",
+      "ye bhi matlabi zindegi",
+      "zadon bhi tere nam haseen ay",
     ];
 
-    // Load audio file safely for GitHub Pages
-    song.src = SONG_URL;
-    song.load();
+    // 🔹 Create Scene
+    const container = document.getElementById("container");
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, 0.1, 1000);
+    camera.position.z = 5;
 
-    playBtn.addEventListener("click", async () => {
-      try {
-        await song.play();
-        playBtn.style.display = "none";
-        startLyrics();
-      } catch (err) {
-        alert("Please tap once more to allow playback!");
-        console.error(err);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(innerWidth, innerHeight);
+    container.appendChild(renderer.domElement);
+
+    // 🔹 Create Particle Field
+    const COUNT = 3000;
+    const positions = new Float32Array(COUNT * 3);
+    for (let i = 0; i < COUNT * 3; i++) positions[i] = (Math.random() - 0.5) * 20;
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    const material = new THREE.PointsMaterial({ color: 0xffffff, size: 0.05 });
+    const points = new THREE.Points(geometry, material);
+    scene.add(points);
+
+    // 🔹 Animation Loop
+    let animating = false;
+    function animate() {
+      requestAnimationFrame(animate);
+      if (animating) {
+        points.rotation.y += 0.005;
+        points.rotation.x += 0.002;
+        material.size = 0.05 + Math.sin(Date.now() * 0.005) * 0.05;
       }
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // 🔹 Audio & Lyrics Handling
+    const audio = document.getElementById("audio");
+    const playBtn = document.getElementById("playBtn");
+    const lyricsDiv = document.getElementById("lyrics");
+
+    let segments = [];
+
+    // 🕒 Manually set duration (GitHub Pages sometimes blocks audio.duration)
+    const dur = 20; // <-- Change this to your song's real duration in seconds
+    const n = lyrics.length;
+    for (let i = 0; i < n; i++) {
+      segments.push({
+        text: lyrics[i],
+        start: (i / n) * dur,
+        end: ((i + 1) / n) * dur
+      });
+    }
+
+    // 🎵 Play Button
+    playBtn.addEventListener("click", async () => {
+      await audio.play();
+      animating = true;
+      playBtn.style.display = "none";
     });
 
-    function startLyrics() {
-      let i = 0;
-      lyricsDiv.textContent = lyrics[i];
-      lyricsDiv.style.opacity = 1;
+    // 🎵 When song ends
+    audio.addEventListener("ended", () => {
+      playBtn.style.display = "block";
+      animating = false;
+      playBtn.textContent = "Play";
+      lyricsDiv.style.opacity = 0;
+    });
 
-      const interval = setInterval(() => {
-        i++;
-        if (i < lyrics.length) {
-          lyricsDiv.style.opacity = 0;
-          setTimeout(() => {
-            lyricsDiv.textContent = lyrics[i];
-            lyricsDiv.style.opacity = 1;
-          }, 200);
-        } else {
-          clearInterval(interval);
-          lyricsDiv.style.opacity = 0;
-          setTimeout(() => {
-            playBtn.textContent = "▶ Replay";
-            playBtn.style.display = "block";
-          }, 2000);
+    // 🪄 Show current lyric
+    setInterval(() => {
+      const t = audio.currentTime;
+      let active = null;
+      for (let s of segments) {
+        if (t >= s.start && t < s.end) {
+          active = s;
+          break;
         }
-      }, 2500);
-    }
-
-    // 🌌 Background animation (canvas stars)
-    const canvas = document.getElementById("bg");
-    const ctx = canvas.getContext("2d");
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
-
-    const stars = Array.from({ length: 100 }, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      r: Math.random() * 1.5 + 0.2,
-      speed: Math.random() * 0.6 + 0.2
-    }));
-
-    function animateStars() {
-      ctx.fillStyle = "rgba(0,0,0,0.3)";
-      ctx.fillRect(0,0,canvas.width,canvas.height);
-      ctx.fillStyle = "white";
-      for (let s of stars) {
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
-        ctx.fill();
-        s.y += s.speed;
-        if (s.y > canvas.height) s.y = 0;
       }
-      requestAnimationFrame(animateStars);
-    }
-    animateStars();
+      if (active) {
+        if (lyricsDiv.textContent !== active.text) {
+          lyricsDiv.textContent = active.text;
+          lyricsDiv.style.opacity = 1;
+        }
+      } else {
+        lyricsDiv.style.opacity = 0;
+      }
+    }, 200);
 
+    // 🪟 Handle window resize
     window.addEventListener("resize", () => {
-      canvas.width = innerWidth;
-      canvas.height = innerHeight;
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
     });
   </script>
 </body>
